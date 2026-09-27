@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- 亮色主题 ---------- */
+:root {
+  --al-bg: #ffffff;
+  --al-card: #ffffff;
+  --al-card-hover: #eae8e4;
+  --al-border: #e4e2dc;
+  --al-text: #2a2825;
+  --al-muted: #8a857c;
+  --al-input-bg: #ffffffe0;
+  --al-input-border: #e4e2dc;
+  --al-input-text: #2a2825;
+  --al-input-placeholder: #a8a39a;
+  --al-button-bg: #c2660a;
+  --al-button-bg-hover: #a05205;
+  --al-button-text: #ffffff;
+  --al-table-bg: #ffffff;
+  --al-table-border: #e4e2dc;
+  --al-table-header-bg: #f2f1ee;
+  --al-table-header-text: #57534a;
+  --al-table-text: #2a2825;
+  --al-table-row-hover: #eae8e4;
+  --al-primary: #9a5a07;
+  --al-primary-bg: #fff7e8;
+  --al-primary-border: #f5ddb0;
+  --al-link: #b45309;
+  --al-nav-bg: #f2f1ee;
+  --al-nav-border: #e4e2dc;
+  --al-nav-text: #57534a;
+  --al-danger: #b23a3a;
+  --al-danger-bg: #fdefef;
+  --al-danger-border: #d64545;
+  --al-success: #2c7a4b;
+  --al-success-bg: #edf7f0;
+  --al-success-border: #3f8f5f;
+  --al-warning: #b06a0a;
+  --al-warning-bg: #fff8ea;
+  --al-warning-border: #d98a1c;
+}
+
+/* ---------- 暗色主题 ---------- */
+[data-theme='dark'] {
+  --al-bg: #1d1c1a;
+  --al-card: #1d1c1a;
+  --al-card-hover: #2b2926;
+  --al-border: #34312d;
+  --al-text: #e4e1db;
+  --al-muted: #8b867d;
+  --al-input-bg: #171615;
+  --al-input-border: #34312d;
+  --al-input-text: #e4e1db;
+  --al-input-placeholder: #63605a;
+  --al-button-bg: #e59b26;
+  --al-button-bg-hover: #f0ab3c;
+  --al-button-text: #141312;
+  --al-table-bg: #1d1c1a;
+  --al-table-border: #34312d;
+  --al-table-header-bg: #23211f;
+  --al-table-header-text: #a9a49b;
+  --al-table-text: #e4e1db;
+  --al-table-row-hover: #2b2926;
+  --al-primary: #f0c378;
+  --al-primary-bg: #2c2010;
+  --al-primary-border: #4a3515;
+  --al-link: #f0b54d;
+  --al-nav-bg: #23211f;
+  --al-nav-border: #34312d;
+  --al-nav-text: #a9a49b;
+  --al-danger: #e89487;
+  --al-danger-bg: #331b18;
+  --al-danger-border: #d96a5c;
+  --al-success: #7cc99b;
+  --al-success-bg: #16271c;
+  --al-success-border: #4fae74;
+  --al-warning: #e3b05e;
+  --al-warning-bg: #2d2413;
+  --al-warning-border: #d99a3a;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--al-bg);
+  color: var(--al-text);
+}

@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    /* model */
+    "target": "ESNext",
+    "module": "ESNext",
+    "esModuleInterop": true,
+    /* json */
+    "resolveJsonModule": true,
+    /* Bundler mode */
+    "jsx": "react",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+    /* version */
+    "ignoreDeprecations": "5.0",
+    /* strict */
+    "allowJs": false,
+    "noImplicitAny": false,
+    "useDefineForClassFields": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+
+    "outDir": "lib",
+    "composite": true
+  },
+  "include": ["src", "vite.config.ts", "package.json"]
+  // "extends": "lvyjs/tsconfig.json",
+}

@@ -1,0 +1,33 @@
+# 依赖
+node_modules
+.pnp/
+.pnp.js
+
+# 数据
+.data/
+data/
+
+# 构建产物
+lib/
+dist/
+build/
+*.tsbuildinfo
+
+# 环境与密钥
+.env
+.env.*
+*.pem
+*.key
+
+# 日志
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 工具
+.DS_Store
+*.local
+
+/packages

@@ -1,0 +1,10 @@
+{
+  "include": ["src/**/*", "jsxp.config.tsx", "package.json"],
+  "extends": "lvyjs/tsconfig.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": false,
+    "noEmit": false,
+    "composite": true,
+    "outDir": "lib"
+  }
+}

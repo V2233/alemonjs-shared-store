@@ -1,0 +1,87 @@
+{
+  "name": "alemonjs-shared-store",
+  "description": "alemonjs 共享数据缓存库",
+  "main": "src/index.ts",
+  "type": "module",
+  "version": "0.1.0",
+  "devDependencies": {
+    "@koa/cors": "^5.0.0",
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^24",
+    "@types/koa": "^3.0.3",
+    "@types/koa__cors": "^5.0.1",
+    "@types/koa__router": "^15.0.0",
+    "@types/koa-static": "^4.0.4",
+    "alemonjs": "^2.1.103",
+    "lvyjs": "^0.3.0-alpha.5",
+    "tsx": "^4.23.13",
+    "koa": "^3.2.1",
+    "koa-static": "^5.0.0",
+    "@alemonjs/react-ui": "*",
+    "@tailwindcss/forms": "^0.5.9",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.19",
+    "classnames": "^2.5.1",
+    "postcss": "^8.4.38",
+    "postcss-import": "^16.1.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "@types/react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.4",
+    "oxfmt": "^0.67.0",
+    "sass": "^1.75.0",
+    "tailwindcss": "^3.4.3",
+    "vite": "^8.3.0"
+  },
+  "dependencies": {
+    "@koa/bodyparser": "^6.1.0",
+    "@koa/router": "^15.7.0",
+    "better-sqlite3": "^13.0.3",
+    "lru-cache": "^11.5.3"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./package": "./package.json",
+    "./load": "./src/load.ts",
+    "./vars": "./vars/index.js",
+    "./store/classes": "./src/store/classes/index.ts"
+  },
+  "homepage": "",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "scripts": {
+    "app": "node index.js",
+    "build": "lvy build",
+    "bundle": "lvy build",
+    "delete": "pm2 delete pm2.config.cjs",
+    "dev": "lvy app.ts",
+    "review": "npx alemonc start",
+    "start": "pm2 startOrRestart pm2.config.cjs",
+    "stop": "pm2 stop pm2.config.cjs",
+    "view": "lvy app.ts --jsxp",
+    "fmt": "oxfmt --write .",
+    "dev:web": "vite",
+    "build:web": "tsc -p tsconfig.web.json --noEmit && vite build",
+    "dev:db": "tsx src/server/index.ts",
+    "bench": "node --expose-gc --import tsx benchmark/run.ts"
+  },
+  "bin": {
+    "alemonjs-shared-store": "./bin/index.js"
+  },
+  "files": [
+    "bin/**/*",
+    "vars/**/*",
+    "lib/**/*",
+    "dist/**/*",
+    "config/**/*"
+  ],
+  "alemonjs": {
+    "build": "bundle",
+    "web": {
+      "root": "dist"
+    }
+  }
+}
