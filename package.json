@@ -50,7 +50,12 @@
   "license": "MIT",
   "private": false,
   "publishConfig": {
-    "registry": "https://registry.npmjs.org"
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/V2233/alemonjs-shared-store"
   },
   "scripts": {
     "app": "node index.js",
