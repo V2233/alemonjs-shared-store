@@ -2,7 +2,9 @@ import { bumpStoreVersion } from 'alemonjs';
 import { PLUGIN_ROOT_DIR } from 'alemonjs-shared-store/vars';
 import { join } from 'path';
 
+import pkgJson from '../package.json';
 import { APP_NAME } from './api/getGlobalNs';
+import { responseRouter } from './response';
 import router from './server/routes';
 import { getGlobalEventStore, ingestMessageEvent } from './store';
 
@@ -27,6 +29,7 @@ export function loadApp(appName = APP_NAME) {
       },
     },
     register: {
+      responseRouter,
       koaRouter: router,
     },
   };
@@ -36,7 +39,7 @@ export function loadApp(appName = APP_NAME) {
     enabled: true,
     status: 'ready',
     rootDir: PLUGIN_ROOT_DIR,
-    mainPath: join(PLUGIN_ROOT_DIR, 'src', 'index.ts'),
+    mainPath: join(PLUGIN_ROOT_DIR, pkgJson.main),
     capabilities: { event: true, httpApi: true, web: true, schedule: false, expose: false },
     createdAt: Date.now(),
     updatedAt: Date.now(),

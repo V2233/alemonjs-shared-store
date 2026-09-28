@@ -1,7 +1,7 @@
 {
   "name": "alemonjs-shared-store",
   "description": "alemonjs 共享数据缓存库",
-  "main": "src/index.ts",
+  "main": "lib/index.js",
   "type": "module",
   "version": "0.1.0",
   "devDependencies": {
@@ -40,11 +40,11 @@
     "lru-cache": "^11.5.3"
   },
   "exports": {
-    ".": "./src/index.ts",
+    ".": "./lib/index.js",
     "./package": "./package.json",
-    "./load": "./src/load.ts",
+    "./load": "./lib/load.js",
     "./vars": "./vars/index.js",
-    "./store/classes": "./src/store/classes/index.ts"
+    "./store/classes": "./lib/store/classes/index.js"
   },
   "homepage": "",
   "license": "MIT",

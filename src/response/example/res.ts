@@ -1,5 +1,7 @@
-import { useEvent } from 'alemonjs';
-import { useEventStore } from 'alemonjs-shared-store';
+import { Format, useEvent, useMessage } from 'alemonjs';
+import { PLUGIN_NAME } from 'alemonjs-shared-store/vars';
+
+import { useEventStore } from '../../api';
 
 export default async () => {
   const prefix = '/store ';
@@ -12,105 +14,210 @@ export default async () => {
     next();
     return;
   }
+  const [message] = useMessage();
+  const format = Format.create();
 
   const store = useEventStore();
   const cmd = event.current.MessageText.replace(prefix, '').trim();
 
   switch (cmd) {
     // ---------------- 群 ----------------
-    case '群是否存在':
-      logger.info(`已入库: ${await store.hasGroup()}`);
+    case '群是否存在': {
+      const msg = `已入库: ${await store.hasGroup()}`;
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
+    }
 
     case '群信息': {
       const group = await store.getGroup();
       if (!group) {
-        logger.info('群不存在');
+        const msg = '群不存在';
+        logger.info(`[${PLUGIN_NAME}]`, msg);
+        format.addText(msg);
+        message.send({ format });
         break;
       }
-      logger.info(`群号: ${group.group_id}`);
+
+      const lines: string[] = [`群号: ${group.group_id}`];
       for (const [uid, m] of Object.entries(group.members)) {
-        logger.info(`  ${uid} | ${m.nickname} | ${m.role} | 退群: ${m.removed ? '是' : '否'}`);
+        lines.push(
+          `${uid} | ${m.nickname ?? '-'} | ${m.role ?? '-'} | 退群: ${m.removed ? '是' : '否'}`
+        );
       }
+      const msg = lines.join('\n');
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
     }
 
-    case '群成员数':
-      logger.info(`成员数: ${await store.getGroupMemberCount()}`);
+    case '群成员数': {
+      const msg = `成员数: ${await store.getGroupMemberCount()}`;
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
+    }
 
     case '群消息数': {
-      logger.info(`不含撤销: ${await store.getGroupMessageCount()}`);
-      logger.info(`含撤销: ${await store.getGroupMessageCount({ includeRemoved: true })}`);
+      const notRemoved = await store.getGroupMessageCount();
+      const all = await store.getGroupMessageCount({ includeRemoved: true });
+      const msg = `不含撤销: ${notRemoved}\n含撤销: ${all}`;
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
     }
 
-    case '所有群号':
-      logger.info((await store.getAllGroupIds()).join(', '));
+    case '所有群号': {
+      const ids = await store.getAllGroupIds();
+      const msg = `共 ${ids.length} 个群\n${ids.join(', ')}`;
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
+    }
 
     // ---------------- 用户 ----------------
-    case '当前用户':
-      logger.info(await store.getUser());
+    case '当前用户': {
+      const user = await store.getUser();
+      const msg = user
+        ? `userId: ${user.user_id}\n用户名: ${user.username}\n头像: ${user.avatar}`
+        : '用户不存在';
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
+    }
 
-    case '批量用户':
-      logger.info(await store.getUsers({ UserIds: ['a', 'b', 'c'] }));
+    case '批量用户': {
+      const users = await store.getUsers({ UserIds: ['a', 'b', 'c'] });
+      const entries = Object.entries(users);
+      const msg =
+        entries.length === 0
+          ? '未找到用户'
+          : entries.map(([uid, u]) => `${uid} | ${u.username}`).join('\n');
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
+    }
 
-    case '全部用户':
-      logger.info(`共 ${Object.keys(await store.getUsers({ limit: 1000 })).length} 个`);
+    case '全部用户': {
+      const users = await store.getUsers({ limit: 1000 });
+      const count = Object.keys(users).length;
+      const msg = `共 ${count} 个用户（最多显示 1000）`;
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
+    }
 
     case '查找成员': {
+      const lines: string[] = [];
+
       // 当前群当前发送者
-      logger.info('当前:', await store.findMember());
+      const m1 = await store.findMember();
+      lines.push(`当前: ${m1 ? `${m1.user_id} | ${m1.nickname}` : '未找到'}`);
+
       // 当前群指定用户
-      logger.info('当前群指定用户:', await store.findMember({ UserId: 'xxx' }));
+      const m2 = await store.findMember({ UserId: 'xxx' });
+      lines.push(`当前群指定用户: ${m2 ? `${m2.user_id} | ${m2.nickname}` : '未找到'}`);
+
       // 指定群
-      logger.info('指定群:', await store.findMember({ UserId: 'xxx', GuildId: 'yyy' }));
+      const m3 = await store.findMember({ UserId: 'xxx', GuildId: 'yyy' });
+      lines.push(`指定群: ${m3 ? `${m3.user_id} | ${m3.nickname}` : '未找到'}`);
+
       // 全局
-      logger.info('全局:', await store.findMember({ UserId: 'xxx', GuildId: null }));
+      const m4 = await store.findMember({ UserId: 'xxx', GuildId: null });
+      lines.push(`全局: ${m4 ? `${m4.user_id} | ${m4.nickname}` : '未找到'}`);
+
+      const msg = lines.join('\n');
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
     }
 
     // ---------------- 成员 ----------------
-    case '当前成员':
-      logger.info(await store.getGroupMember());
+    case '当前成员': {
+      const m = await store.getGroupMember();
+      const msg = m
+        ? `userId: ${m.user_id}\n昵称: ${m.nickname ?? '-'}\n角色: ${m.role ?? '-'}\n退群: ${m.removed ? '是' : '否'}`
+        : '成员不存在';
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
+    }
 
     case '群员列表': {
       const members = await store.getGroupMembers();
-      store.toArray(members).forEach(m => {
-        logger.info(
-          `${m.user_id} | ${m.nickname} | ${m.avatar} | 退群: ${m.removed ? '是' : '否'}`
-        );
-      });
+      const arr = store.toArray(members);
+      const msg =
+        arr.length === 0
+          ? '群内暂无成员记录'
+          : arr
+              .map(m => `${m.user_id} | ${m.nickname ?? '-'} | 退群: ${m.removed ? '是' : '否'}`)
+              .join('\n');
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
     }
 
     // ---------------- 消息 ----------------
     case '最近消息': {
       const msgs = await store.getMessages({ limit: 20 });
-      logger.info(`共 ${msgs.length} 条`);
+      const msg =
+        msgs.length === 0
+          ? '暂无消息'
+          : msgs
+              .map(m => `[${new Date(m.timestamp).toLocaleString()}] ${m.user_id}: ${m.text}`)
+              .join('\n');
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
     }
 
     case '所有人消息': {
       const msgs = await store.getMessages({ UserId: null, limit: 20 });
-      logger.info(`共 ${msgs.length} 条`);
+      const msg =
+        msgs.length === 0
+          ? '暂无消息'
+          : msgs
+              .map(m => `[${new Date(m.timestamp).toLocaleString()}] ${m.user_id}: ${m.text}`)
+              .join('\n');
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
     }
 
     case '跨群消息': {
       const msgs = await store.getMessages({ GuildId: null, limit: 20 });
-      logger.info(`共 ${msgs.length} 条`);
+      const msg =
+        msgs.length === 0
+          ? '暂无消息'
+          : msgs.map(m => `[${m.group_id || '私聊'}] ${m.user_id}: ${m.text}`).join('\n');
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
     }
 
     case '多群消息': {
       const msgs = await store.getMessages({ GuildId: ['g1', 'g2'], UserId: null });
-      logger.info(`共 ${msgs.length} 条`);
+      const msg =
+        msgs.length === 0
+          ? '暂无消息'
+          : msgs.map(m => `[${m.group_id}] ${m.user_id}: ${m.text}`).join('\n');
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
     }
 
@@ -120,59 +227,140 @@ export default async () => {
         since: Date.now() - 24 * 3600 * 1000,
         limit: 20,
       });
-      logger.info(`共 ${msgs.length} 条`);
+      const msg =
+        msgs.length === 0
+          ? '未匹配到消息'
+          : msgs
+              .map(m => `[${new Date(m.timestamp).toLocaleString()}] ${m.user_id}: ${m.text}`)
+              .join('\n');
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
     }
 
-    case '提及某人': {
-      const msgs = await store.getMessages({ mention: 'xxx', limit: 20 });
-      logger.info(`共 ${msgs.length} 条`);
+    case '我at过谁': {
+      // 当前用户在最近 7 天内 @ 过的人
+      const msgs = await store.getMessages({
+        UserId: event.current.UserId,
+        since: Date.now() - 7 * 24 * 3600 * 1000,
+        limit: 200,
+      });
+
+      // 去重收集被 @ 的 userId
+      const mentioned = new Set<string>();
+      for (const m of msgs) {
+        for (const uid of m.mentions ?? []) {
+          if (uid === event.current.UserId) continue;
+          mentioned.add(uid);
+        }
+      }
+
+      const list = [...mentioned];
+      const msg =
+        list.length === 0
+          ? '最近 7 天没有 @ 过任何人'
+          : `最近 7 天 @ 过 ${list.length} 人:\n${list.join(', ')}`;
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
     }
 
-    case '所有@我': {
-      const msgs = await store.getMessages({ onlyAtMe: true, limit: 20 });
-      logger.info(`共 ${msgs.length} 条`);
+    case '谁at我': {
+      const msgs = await store.getMessages({
+        mention: event.current.UserId,
+        limit: 20,
+      });
+      const msg =
+        msgs.length === 0
+          ? '最近没有 @ 过你的消息'
+          : msgs
+              .map(m => `[${new Date(m.timestamp).toLocaleString()}] ${m.user_id}: ${m.text}`)
+              .join('\n');
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
     }
 
     case '私聊消息': {
       const msgs = await store.getMessages({ onlyPrivate: true, limit: 20 });
-      logger.info(`共 ${msgs.length} 条`);
+      const msg =
+        msgs.length === 0
+          ? '暂无私聊消息'
+          : msgs
+              .map(m => `[${new Date(m.timestamp).toLocaleString()}] ${m.user_id}: ${m.text}`)
+              .join('\n');
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
     }
 
     case '按时间': {
-      const msgs = await store.getMessages({
-        since: Date.now() - 24 * 3600 * 1000,
-        until: Date.now(),
-        limit: 20,
-      });
-      logger.info(`共 ${msgs.length} 条`);
+      const since = Date.now() - 24 * 3600 * 1000;
+      const until = Date.now();
+      const msgs = await store.getMessages({ since, until, limit: 20 });
+      const msg =
+        msgs.length === 0
+          ? '该时间段内无消息'
+          : msgs
+              .map(m => `[${new Date(m.timestamp).toLocaleString()}] ${m.user_id}: ${m.text}`)
+              .join('\n');
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
     }
 
     case '按ID': {
-      const msg = await store.getMessageById({ MessageId: event.current.MessageId });
-      logger.info(msg);
+      const msgRecord = await store.getMessageById({ MessageId: event.current.MessageId });
+      const msg = msgRecord
+        ? `messageId: ${msgRecord.message_id}\nuserId: ${msgRecord.user_id}\ntext: ${msgRecord.text}`
+        : '消息不存在';
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
     }
 
     // ---------------- 统计 ----------------
-    case '消息统计':
-      logger.info(`今日: ${await store.countMessages({ since: Date.now() - 86400000 })}`);
+    case '消息统计': {
+      const since = Date.now() - 86400000;
+      const count = await store.countMessages({ since });
+      const msg = `今日消息数: ${count}`;
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
+    }
 
-    case '活跃用户':
-      logger.info(`今日: ${await store.countActiveUsers({ since: Date.now() - 86400000 })}`);
+    case '活跃用户': {
+      const since = Date.now() - 86400000;
+      const count = await store.countActiveUsers({ since });
+      const msg = `今日活跃用户数: ${count}`;
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
+    }
 
     // ---------------- 元信息 ----------------
-    case '上下文':
-      logger.info(store.context);
+    case '上下文': {
+      const c = store.context;
+      const msg = `platform: ${c.platform}\nbotId: ${c.botId}\nGuildId: ${c.GuildId}\nUserId: ${c.UserId}`;
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
       break;
+    }
 
-    default:
-      logger.info(`未知指令: ${cmd}`);
+    default: {
+      const msg = `未知指令: ${cmd}`;
+      logger.info(`[${PLUGIN_NAME}]`, msg);
+      format.addText(msg);
+      message.send({ format });
+    }
   }
 };
