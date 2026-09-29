@@ -32,12 +32,12 @@ async function main() {
       );
     } else {
       // 无 app 依赖
-      namespace['versions'] = [];
+      namespace['versions'] = new Set<string>();
     }
   }
 
   const maxVerion = findMaxVersion(namespace['versions'] as Set<string>);
-  if (maxVerion && maxVerion === pkgJson.version) {
+  if (maxVerion && maxVerion == pkgJson.version) {
     const botConfig = getConfig();
     logger.info(`[${APP_NAME}]开始加载...`);
     logger.info(`[${APP_NAME}]加载版本：${pkgJson.version}`);
