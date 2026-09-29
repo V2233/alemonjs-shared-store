@@ -3,7 +3,7 @@
   "description": "alemonjs 共享数据缓存库",
   "main": "lib/index.js",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "devDependencies": {
     "@koa/cors": "^5.0.0",
     "@types/better-sqlite3": "^9.6.0",

@@ -21,11 +21,18 @@ async function main() {
   if (!namespace['versions']) {
     const botConfig = getConfig();
     const value = botConfig.value || {};
-    const apps = value?.apps;
+    let apps = value?.apps;
 
     // 确保加载全局最高版本
     if (Array.isArray(apps)) {
       namespace['versions'] = getAllThisPkgVersions(apps);
+    } else if (apps) {
+      namespace['versions'] = getAllThisPkgVersions(
+        Object.keys(apps).filter(app => apps[app] === true)
+      );
+    } else {
+      // 无 app 依赖
+      namespace['versions'] = [];
     }
   }
 

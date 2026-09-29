@@ -75,7 +75,7 @@ export default function Groups() {
           rowKey={r => r.group_id}
           onRowClick={r => navigate(`/groups/${r.group_id}?platform=${platform}&botId=${botId}`)}
           placeholder={{
-            text: '暂无数据，数据库使用懒初始化以复用连接实例，请对机器人发送一条消息后再刷新！',
+            text: '暂无数据，服务端基于事件懒初始化以复用数据库连接实例，请对机器人发送一条消息后再刷新！',
           }}
         />
       )}
