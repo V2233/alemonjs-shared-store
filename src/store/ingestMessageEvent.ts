@@ -13,13 +13,10 @@ export async function ingestMessageEvent(store: EventStore, event: Events[keyof 
     case 'private.message.create':
     case 'message.create': {
       const rawMentions = event.MessageMentions || [];
-      // 提取 content 摘要，丢掉 auth_token
       const content = event.MessageContent
         ? {
             type: event.MessageContent.type,
             source: event.MessageContent.source,
-            // context: event.MessageContent.context, // TODO: auth_token存在可能得消息过期失效问题
-            // referenceId: event.MessageContent.referenceId,
           }
         : null;
 
@@ -30,13 +27,18 @@ export async function ingestMessageEvent(store: EventStore, event: Events[keyof 
           if (mention.IsBot) {
             isAtMe = true;
             return false;
-          } else {
-            return true;
           }
+          return true;
         })
         .map(m => m.UserId);
 
-      // 发送者写入 users/members
+      // 私聊：GuildId 可能为空
+      const isPrivate = !!event.IsPrivate || !event.GuildId;
+
+      // 发送者写入 users（群聊时同时写 members）
+      // setGroupMember 内部会处理 groupId 为空的情况：
+      //   - groupId 有值 → 写 users + members
+      //   - groupId 为空 → 只写 users
       await store.setGroupMember(platform, botId, event.GuildId, event.UserId, {
         user_id: event.UserId,
         username: event.UserName ?? '',
@@ -45,29 +47,31 @@ export async function ingestMessageEvent(store: EventStore, event: Events[keyof 
         role: event.Role ?? '',
       });
 
-      // 被 @ 的人写入 users/members（没有 avatar 就留空，不覆盖已有）
-      for (const m of rawMentions) {
-        if (!m.UserId || m.UserId === botId) continue;
-        await store.setGroupMember(platform, botId, event.GuildId, m.UserId, {
-          user_id: m.UserId,
-          username: m.UserName ?? '',
-          nickname: m.UserName ?? '',
-          avatar: m.UserAvatar ?? '', // mentions 里没有 avatar，留空不覆盖
-          role: m.Role ?? '',
-        });
+      // 被 @ 的人只在群聊场景写入（私聊没有“被 @ 的人”概念）
+      if (!isPrivate) {
+        for (const m of rawMentions) {
+          if (!m.UserId || m.UserId === botId) continue;
+          await store.setGroupMember(platform, botId, event.GuildId, m.UserId, {
+            user_id: m.UserId,
+            username: m.UserName ?? '',
+            nickname: m.UserName ?? '',
+            avatar: m.UserAvatar ?? '',
+            role: m.Role ?? '',
+          });
+        }
       }
 
       // 消息入库
       await store.appendMessage(platform, botId, {
         message_id: event.MessageId,
-        group_id: event.IsPrivate ? '' : event.GuildId,
+        group_id: isPrivate ? '' : event.GuildId,
         user_id: event.UserId,
         timestamp: event.Timestamp ?? Date.now(),
         text: event.MessageText ?? '',
         mentions: mentionIds,
         media: event.MessageMedia ?? [],
         content,
-        is_private: !!event.IsPrivate,
+        is_private: isPrivate,
         is_at_me: !!isAtMe,
       });
 
@@ -79,6 +83,10 @@ export async function ingestMessageEvent(store: EventStore, event: Events[keyof 
     }
     case 'member.add':
     case 'member.update': {
+      if (!event.GuildId) {
+        // logger.warn(`[${APP_NAME}][ingestMessageEvent] ${event.name} 缺少 GuildId，跳过`);
+        break;
+      }
       await store.setGroupMember(platform, botId, event.GuildId, event.UserId, {
         user_id: event.UserId,
         username: event.UserName ?? '',

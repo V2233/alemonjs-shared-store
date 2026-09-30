@@ -1,5 +1,4 @@
-import { BASE_PATH } from './vars';
-const BASE = BASE_PATH + '/api';
+const BASE = './api';
 
 const TOKEN_KEY = 'alemonjs-shared-store-token';
 

@@ -846,6 +846,9 @@ export class EventStore {
   }
 
   async ensureGroup(platform: string, botId: string, groupId: string): Promise<IStoreGroup> {
+    if (!groupId) {
+      logger.warn(`[${APP_NAME}][EventStore] ensureGroup: groupId 不能为空`);
+    }
     const inst = await this.ensureInstance(platform, botId);
     const cached = inst.cache.get(groupId);
     if (cached) return cached;
@@ -867,6 +870,27 @@ export class EventStore {
     member: IStoreGroupMember
   ): Promise<void> {
     const inst = await this.ensureInstance(platform, botId);
+
+    // groupId 为空：只写 users 表，不碰 members
+    if (!groupId) {
+      const existing = inst.userIndex.get(userId);
+      const merged: IStoreGroupMember = existing
+        ? {
+            ...existing,
+            ...member,
+            username: member.username || existing.username,
+            avatar: existing.avatar || member.avatar,
+          }
+        : {
+            ...member,
+            avatar: member.avatar || makeUserAvatarUrl(userId, botId, platform),
+          };
+      inst.userIndex.set(userId, merged);
+      inst.dirtyUsers.add(userId);
+      return;
+    }
+
+    // 正常群成员逻辑
     const group = await this.ensureGroup(platform, botId, groupId);
 
     const existing = group.members[userId];
@@ -875,14 +899,12 @@ export class EventStore {
           ...existing,
           ...member,
           username: member.username || existing.username,
-          // 已有头像优先保留，不覆盖；没有才用新值
           avatar: existing.avatar || member.avatar,
           nickname: member.nickname ?? existing.nickname,
           role: member.role ?? existing.role,
         }
       : {
           ...member,
-          // 首次插入才用兜底头像
           avatar: member.avatar || makeUserAvatarUrl(userId, botId, platform),
         };
 
