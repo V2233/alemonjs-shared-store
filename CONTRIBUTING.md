@@ -2,7 +2,7 @@
 
 ### 🚀 开发前必读
 
-- **提交问题**: 在[Issue 区](https://github.com/ov0-lab/ov0/issues)提出你的想法。
+- **提交问题**: 在[Issue 区](https://github.com/V2233/alemonjs-shared-store/issues)提出你的想法。
 - **熟悉代码**: 本仓库采用monorepo架构，顶层主要目录结构如下：
   ```text
   ./
